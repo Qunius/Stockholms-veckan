@@ -1,0 +1,651 @@
+/* css/style.css */
+
+/* ============================================================
+   DESIGN TOKENS AND RESET
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:      #F8F7F4;
+  --surface: #FFFFFF;
+  --border:  #E2DED8;
+  --text:    #111111;
+  --muted:   #777777;
+  --accent:  #5B3FE8;
+  --coral:   #F0522A;
+  --amber:   #F5A623;
+  --green:   #00B37D;
+  --font-serif: 'Georgia', serif;
+  --font-sans:  -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ============================================================
+   HEADER STYLES
+   ============================================================ */
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+
+.logo small {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.saved-count {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.saved-count svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tipsa-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tipsa-btn:hover {
+  background: #4a30d4;
+}
+
+/* ============================================================
+   HERO, WEATHER BAR, FILTERS
+   ============================================================ */
+
+/* Hero */
+.hero {
+  padding: 48px 32px 36px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: 52px;
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -2px;
+  margin-bottom: 12px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--coral);
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+/* Weekly weather bar */
+.weather-bar {
+  background: var(--accent);
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  overflow-x: auto;
+}
+
+.weather-bar-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+}
+
+.weather-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 52px;
+}
+
+.weather-day-name {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.6);
+}
+
+.weather-day img {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.weather-day-temp {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Filters */
+.filters {
+  padding: 12px 32px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 60px;
+  z-index: 99;
+}
+
+.filter-tab {
+  font-size: 12px;
+  padding: 6px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  background: transparent;
+  color: #555;
+  transition: all .15s;
+}
+
+.filter-tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ============================================================
+   EVENT CARD STYLES
+   ============================================================ */
+
+/* Event list */
+.event-list {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+.event-item {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 190px 1fr 72px;
+  gap: 24px;
+  align-items: start;
+}
+
+.event-item.featured {
+  background: var(--surface);
+  border-radius: 6px;
+  margin: 28px -20px 0;
+  padding: 28px;
+  border: none;
+  border-top: 3px solid var(--accent);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+}
+
+.event-item[hidden] {
+  display: none;
+}
+
+.event-image-wrap {
+  position: relative;
+}
+
+.event-image {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 2px;
+  display: block;
+}
+
+.event-image-fallback {
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  background: #EEE9FF;
+}
+
+.event-image-fallback img {
+  width: 48px;
+  height: 48px;
+}
+
+.event-meta {
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.event-category {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+.badge-popup {
+  background: #FFF3CD;
+  color: #7A5700;
+}
+
+.badge-deal {
+  background: #FFE8E4;
+  color: #B8280A;
+}
+
+.badge-today {
+  background: var(--accent);
+  color: #fff;
+}
+
+.badge-free {
+  background: #D6F5EB;
+  color: #0A6B45;
+}
+
+.badge-new {
+  background: #EEE9FF;
+  color: var(--accent);
+}
+
+.badge-night {
+  background: #1A1035;
+  color: #A98EFF;
+}
+
+.event-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.event-desc {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.event-location a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+
+.event-location a::before {
+  content: "↗ ";
+  font-size: 11px;
+  opacity: 0.5;
+}
+
+.event-location a:hover {
+  color: var(--coral);
+  border-bottom-color: var(--coral);
+}
+
+/* Actions column */
+.event-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.weather-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.weather-block img {
+  width: 30px;
+  height: 30px;
+}
+
+.weather-temp {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.weather-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
+}
+
+.actions-divider {
+  width: 28px;
+  height: 1px;
+  background: var(--border);
+}
+
+.heart-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.heart-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.heart-label {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  color: #AAA;
+  text-transform: uppercase;
+}
+
+.heart-btn.saved svg path {
+  fill: var(--coral);
+  stroke: var(--coral);
+}
+
+.heart-btn.saved .heart-label {
+  color: var(--coral);
+}
+
+/* ============================================================
+   SKELETON, EMPTY STATE, ERROR BANNER, MODAL
+   ============================================================ */
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #ece9e3 25%, #f5f3ef 50%, #ece9e3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 3px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-card {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 190px 1fr 72px;
+  gap: 24px;
+}
+
+.skeleton-image {
+  aspect-ratio: 4/3;
+  border-radius: 2px;
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 10px;
+}
+
+.skeleton-line.short {
+  width: 40%;
+}
+
+.skeleton-line.medium {
+  width: 70%;
+}
+
+.skeleton-line.long {
+  width: 90%;
+}
+
+.skeleton-title {
+  height: 28px;
+  width: 80%;
+  margin-bottom: 12px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 64px 32px;
+}
+
+.empty-state h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Error banner */
+.error-banner {
+  background: #FFF3CD;
+  border-bottom: 1px solid #F0D050;
+  padding: 12px 32px;
+  font-size: 13px;
+  color: #7A5700;
+  display: none;
+}
+
+.error-banner.visible {
+  display: block;
+}
+
+/* Tip modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 36px;
+  width: 100%;
+  max-width: 480px;
+  margin: 16px;
+}
+
+.modal h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.modal-sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-group textarea {
+  height: 80px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.btn-cancel {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  padding: 9px 18px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.btn-submit {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 9px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #4a30d4;
+}
+
+.btn-submit:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
