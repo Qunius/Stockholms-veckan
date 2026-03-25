@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockholm den här veckan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: #FAFAF7;
+    color: #111;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 20px 32px;
+    border-bottom: 1px solid #E5E2DC;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+  }
+  .logo small {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #999;
+    display: block;
+    margin-top: 1px;
+    font-style: normal;
+  }
+  .week-tag {
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 44px 32px 36px;
+    border-bottom: 1px solid #E5E2DC;
+    max-width: 780px;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #B85C2A;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: 'Georgia', serif;
+    font-size: 52px;
+    font-weight: 400;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+  .hero h1 em { font-style: italic; color: #B85C2A; }
+  .hero-sub {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.6;
+    max-width: 500px;
+  }
+
+  /* ── Filters ── */
+  .filters {
+    padding: 12px 32px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #E5E2DC;
+    position: sticky;
+    top: 0;
+    background: #FAFAF7;
+    z-index: 10;
+  }
+  .filter-tab {
+    font-size: 12px;
+    padding: 6px 14px;
+    border: 1px solid #D0CCC4;
+    border-radius: 20px;
+    cursor: pointer;
+    background: transparent;
+    color: #555;
+    letter-spacing: 0.2px;
+  }
+  .filter-tab.active { background: #111; border-color: #111; color: #fff; }
+
+  /* ── Event list ── */
+  .event-list {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  .event-item {
+    padding: 36px 0;
+    border-bottom: 1px solid #E5E2DC;
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 28px;
+    position: relative;
+    align-items: start;
+  }
+
+  /* Featured gets full attention */
+  .event-item.featured {
+    background: #fff;
+    border-radius: 4px;
+    margin: 28px -20px 0;
+    padding: 28px 28px;
+    border: none;
+    border-left: 4px solid #B85C2A;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  }
+
+  .event-image-wrap { position: relative; }
+  .event-image {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Weather badge overlaid on image */
+  .weather-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(4px);
+    border-radius: 20px;
+    padding: 4px 10px 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  }
+  .weather-badge .wi { font-size: 16px; }
+
+  .event-body { display: flex; flex-direction: column; gap: 0; padding-right: 44px; }
+
+  /* Friend-voice hook — the star of the show */
+  .friend-hook {
+    font-size: 13px;
+    font-weight: 700;
+    color: #B85C2A;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .friend-hook .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-popup  { background: #FFF3CD; color: #856404; }
+  .badge-deal   { background: #FFE4E4; color: #9B1C1C; }
+  .badge-today  { background: #111; color: #fff; }
+  .badge-free   { background: #D4F5D4; color: #1A6B1A; }
+
+  .event-date {
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+  }
+
+  .event-title {
+    font-family: 'Georgia', serif;
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+
+  /* The punchy one-liner */
+  .event-tagline {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  /* Friend-voice description */
+  .event-desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .event-desc strong { color: #111; }
+
+  .event-footer {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .event-location a {
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .event-location a::before { content: "↗ "; font-size: 11px; opacity: 0.5; }
+  .event-location a:hover { color: #B85C2A; border-bottom-color: #B85C2A; }
+
+  /* Heart */
+  .heart-btn {
+    position: absolute;
+    top: 36px;
+    right: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .event-item.featured .heart-btn { top: 28px; }
+  .heart-btn svg { width: 22px; height: 22px; }
+  .heart-label {
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: #AAA;
+    text-transform: uppercase;
+  }
+  .heart-btn:hover svg path, .heart-btn.saved svg path { fill: #B85C2A; stroke: #B85C2A; }
+  .heart-btn.saved .heart-label { color: #B85C2A; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Stockholm <small>Den här veckan</small></div>
+  <span class="week-tag">Vecka 13 · 23–29 mars</span>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow">Vecka 13 i Stockholm</div>
+  <h1>Sluta säg att<br>Stockholm är <em>tråkigt.</em></h1>
+  <p class="hero-sub">Det händer grejer hela tiden — du vet bara inte var. Vi fixar det. Varje vecka.</p>
+</div>
+
+<div class="filters">
+  <button class="filter-tab active">Allt</button>
+  <button class="filter-tab">🎵 Musik</button>
+  <button class="filter-tab">🎨 Konst</button>
+  <button class="filter-tab">🍜 Mat & dryck</button>
+  <button class="filter-tab">🛍️ Pop-up & marknad</button>
+  <button class="filter-tab">🔥 Fynd & rea</button>
+  <button class="filter-tab">🏃 Sport</button>
+</div>
+
+<div class="event-list">
+
+  <!-- Featured: pop-up street food -->
+  <div class="event-item featured">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" alt="Street food">
+      <div class="weather-badge"><span class="wi">☀️</span> 9°C · Soligt</div>
+    </div>
+    <div class="event-body">
+      <div class="friend-hook">
+        🚨 Du MÅSTE hit
+        <span class="badge badge-today">I helgen</span>
+        <span class="badge badge-free">Gratis inträde</span>
+      </div>
+      <div class="event-date">Lör–Sön 28–29 mars · 12:00–20:00</div>
+      <div class="event-title">Hornstulls Strandbod öppnar för säsongen</div>
+      <div class="event-tagline">Stockholms bästa streetfood-marknad är tillbaka — och det ser solrikt ut.</div>
+      <div class="event-desc">
+        Okej lyssna. Hornstull på en solig lördag med koreansk BBQ, tamales och husmanskost — <strong>det är en av årets bästa upplevelser och den kostar noll kronor.</strong> Kom på lunchen, stanna till kvällen. Ta med ett gäng.
+      </div>
+      <div class="event-footer">
+        <div class="event-location">
+          <a href="https://maps.google.com/?q=Hornstulls+strand,+Stockholm" target="_blank">Hornstulls strand, Södermalm</a>
+        </div>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+  <!-- Lagertömning -->
+  <div class="event-item">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=300&fit=crop" alt="Rea">
+      <div class="weather-badge"><span class="wi">🌧️</span> 5°C · Regn</div>
+    </div>
+    <div class="event-body">
+      <div class="friend-hook">
+        💸 Perfekt regndag-aktivitet
+        <span class="badge badge-deal">Lagertömning</span>
+      </div>
+      <div class="event-date">Fre–Lör 27–28 mars · 09:00–18:00</div>
+      <div class="event-title">Filippa K lagertömning — upp till 80% rabatt</div>
+      <div class="event-tagline">Det regnar fredag. Det är lagertömning. Ser du vad vi ser?</div>
+      <div class="event-desc">
+        Direkt från lagret, inte från butiken. Vi pratar <strong>prover, överskott och gamla kollektioner till ett pris som är lite overkligt.</strong> Inga returer, inga byten — men kom tidigt för det är kö och det är det värt.
+      </div>
+      <div class="event-footer">
+        <div class="event-location">
+          <a href="https://maps.google.com/?q=Fleminggatan+20,+Stockholm" target="_blank">Fleminggatan 20, Kungsholmen</a>
+        </div>
+      </div>
+    </div>
+    <button class="heart-btn saved" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="#B85C2A" stroke="#B85C2A" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Sparat</span>
+    </button>
+  </div>
+
+  <!-- Jazz -->
+  <div class="event-item">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" alt="Jazz">
+      <div class="weather-badge"><span class="wi">⛅</span> 3°C · Molnigt</div>
+    </div>
+    <div class="event-body">
+      <div class="friend-hook">🎷 Seriöst bra kväll</div>
+      <div class="event-date">Måndag 24 mars · 21:00</div>
+      <div class="event-title">Jazz på Fasching</div>
+      <div class="event-tagline">Du behöver inte gilla jazz för att älska det här.</div>
+      <div class="event-desc">
+        Fasching är en av de sista riktiga jazzklubbar i Stockholm och den levererar varje gång. <strong>Ikväll: en av de bästa svenska kvartettarna just nu.</strong> Litet, intimt, bra ljud. Boka biljett nu — det är sällan platser kvar i dörren.
+      </div>
+      <div class="event-footer">
+        <div class="event-location">
+          <a href="https://maps.google.com/?q=Kungsgatan+63,+Stockholm" target="_blank">Kungsgatan 63, Norrmalm</a>
+        </div>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+  <!-- Loppis -->
+  <div class="event-item">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop" alt="Loppis">
+      <div class="weather-badge"><span class="wi">🌤️</span> 7°C · Mest klart</div>
+    </div>
+    <div class="event-body">
+      <div class="friend-hook">
+        🧥 Söndagsmorgon-vibes
+        <span class="badge badge-free">Gratis</span>
+      </div>
+      <div class="event-date">Söndag 29 mars · 10:00–15:00</div>
+      <div class="event-title">Loppmarknad i Gamla Stan</div>
+      <div class="event-tagline">Kom för kaffet, stanna för fynden.</div>
+      <div class="event-desc">
+        Gamla Stans bakgator på en solig söndagsmorgon — det finns knappt något bättre. <strong>Retrokläder, keramik, gamla böcker och prylar du inte visste att du behövde.</strong> Ta med kontanter och gott om tid.
+      </div>
+      <div class="event-footer">
+        <div class="event-location">
+          <a href="https://maps.google.com/?q=Stortorget,+Gamla+Stan,+Stockholm" target="_blank">Stortorget, Gamla Stan</a>
+        </div>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+</div>
+</body>
+</html>

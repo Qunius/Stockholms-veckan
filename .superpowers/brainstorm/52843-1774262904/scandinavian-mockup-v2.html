@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockholm den här veckan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: #F7F4F0;
+    color: #1A1A1A;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #F7F4F0;
+    border-bottom: 1px solid #DDD8D0;
+    padding: 24px 32px 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    color: #1A1A1A;
+  }
+  .logo span {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-family: -apple-system, Arial, sans-serif;
+    font-weight: 400;
+    color: #888;
+    margin-top: 2px;
+  }
+  .header-date {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 13px;
+    color: #888;
+  }
+
+  .page-title {
+    padding: 32px 32px 20px;
+    border-bottom: 1px solid #DDD8D0;
+  }
+  .page-title h1 {
+    font-size: 42px;
+    font-weight: 400;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+  .page-title p {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 15px;
+    color: #888;
+    margin-top: 8px;
+  }
+
+  .filters {
+    padding: 16px 32px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid #DDD8D0;
+  }
+  .filter-tab {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    padding: 7px 16px;
+    border: 1px solid #C8C2B8;
+    border-radius: 2px;
+    cursor: pointer;
+    background: transparent;
+    color: #555;
+  }
+  .filter-tab.active {
+    background: #1A1A1A;
+    border-color: #1A1A1A;
+    color: #F7F4F0;
+  }
+
+  .event-list {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 32px 48px;
+  }
+
+  .event-item {
+    display: flex;
+    gap: 28px;
+    padding: 32px 0;
+    border-bottom: 1px solid #DDD8D0;
+    position: relative;
+    align-items: flex-start;
+  }
+
+  .event-image {
+    width: 180px;
+    min-width: 180px;
+    height: 125px;
+    object-fit: cover;
+    filter: grayscale(10%);
+  }
+
+  .event-body {
+    flex: 1;
+    padding-right: 48px;
+  }
+
+  .event-meta {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .event-meta .category { color: #B85C2A; }
+
+  .event-title {
+    font-size: 23px;
+    font-weight: 400;
+    letter-spacing: -0.4px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    color: #1A1A1A;
+  }
+
+  .event-desc {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 15px;
+    color: #444;
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }
+
+  /* Clickable address */
+  .event-location a {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .event-location a:hover {
+    color: #B85C2A;
+    border-bottom-color: #B85C2A;
+  }
+  .event-location a::before {
+    content: "↗";
+    font-size: 11px;
+    opacity: 0.6;
+  }
+
+  /* Maps badge shown on hover */
+  .maps-hint {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 11px;
+    color: #B85C2A;
+    margin-left: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .event-location:hover .maps-hint { opacity: 1; }
+
+  /* Heart button */
+  .heart-btn {
+    position: absolute;
+    top: 32px;
+    right: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .heart-btn svg { width: 24px; height: 24px; }
+  .heart-label {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: #AAA;
+    text-transform: uppercase;
+  }
+  .heart-btn:hover svg path { fill: #B85C2A; stroke: #B85C2A; }
+  .heart-btn.saved svg path { fill: #B85C2A; stroke: #B85C2A; }
+  .heart-btn.saved .heart-label { color: #B85C2A; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    Stockholm
+    <span>Den här veckan</span>
+  </div>
+  <div class="header-date">Vecka 13 · 23–29 mars 2026</div>
+</header>
+
+<div class="page-title">
+  <h1>Vad händer<br>i Stockholm</h1>
+  <p>Utvalda evenemang, upplevelser och kultur den här veckan</p>
+</div>
+
+<div class="filters">
+  <button class="filter-tab active">Alla</button>
+  <button class="filter-tab">Musik</button>
+  <button class="filter-tab">Konst & kultur</button>
+  <button class="filter-tab">Mat & dryck</button>
+  <button class="filter-tab">Sport</button>
+  <button class="filter-tab">Barn</button>
+</div>
+
+<div class="event-list">
+
+  <div class="event-item">
+    <img class="event-image" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=360&h=250&fit=crop" alt="Konsert">
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Musik</span> &nbsp;·&nbsp; Måndag 24 mars &nbsp;·&nbsp; 20:00</div>
+      <div class="event-title">Jazz på Fasching</div>
+      <div class="event-desc">En av Stockholms mest älskade jazzklubbar öppnar dörren för en kväll med känd svensk jazzkvartett. Intim stämning, utmärkt ljud och bra drinkar.</div>
+      <div class="event-location">
+        <a href="https://maps.google.com/?q=Kungsgatan+63,+Stockholm" target="_blank">
+          Kungsgatan 63, Norrmalm
+        </a>
+        <span class="maps-hint">Öppna i kartan</span>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+  <div class="event-item">
+    <img class="event-image" src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=360&h=250&fit=crop" alt="Konstutställning">
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Konst & kultur</span> &nbsp;·&nbsp; 23–29 mars &nbsp;·&nbsp; 10:00–18:00</div>
+      <div class="event-title">Ny utställning på Moderna Museet</div>
+      <div class="event-desc">En storslagen retrospektiv av nordisk samtidskonst. Femton konstnärer utforskar temat natur och industrialisering i ett Sverige i förändring.</div>
+      <div class="event-location">
+        <a href="https://maps.google.com/?q=Exercisplan+4,+Stockholm" target="_blank">
+          Exercisplan 4, Skeppsholmen
+        </a>
+        <span class="maps-hint">Öppna i kartan</span>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+  <div class="event-item">
+    <img class="event-image" src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=360&h=250&fit=crop" alt="Restaurang">
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Mat & dryck</span> &nbsp;·&nbsp; Tisdag 25 mars &nbsp;·&nbsp; 18:00–22:00</div>
+      <div class="event-title">Vårmenyn på Oaxen Krog</div>
+      <div class="event-desc">Michelinstjärniga Oaxen Krog lanserar sin vårkollektion. En sjurättersmeny med råvaror från svenska gårdar och havet, med fokus på hållbarhet.</div>
+      <div class="event-location">
+        <a href="https://maps.google.com/?q=Beckholmsvägen+26,+Stockholm" target="_blank">
+          Beckholmsvägen 26, Djurgården
+        </a>
+        <span class="maps-hint">Öppna i kartan</span>
+      </div>
+    </div>
+    <button class="heart-btn saved" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="#B85C2A" stroke="#B85C2A" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Sparat</span>
+    </button>
+  </div>
+
+  <div class="event-item">
+    <img class="event-image" src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=360&h=250&fit=crop" alt="Teater">
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Teater</span> &nbsp;·&nbsp; Onsdag 26 mars &nbsp;·&nbsp; 19:00</div>
+      <div class="event-title">Hamlet — Kungliga Dramatiska Teatern</div>
+      <div class="event-desc">Dramatens hyllade uppsättning av Shakespeares mästerverk, regisserad av Stina Ekblad. Föreställningen spelas på svenska med surtitlar på engelska.</div>
+      <div class="event-location">
+        <a href="https://maps.google.com/?q=Nybroplan,+Stockholm" target="_blank">
+          Nybroplan, Östermalm
+        </a>
+        <span class="maps-hint">Öppna i kartan</span>
+      </div>
+    </div>
+    <button class="heart-btn" onclick="this.classList.toggle('saved'); this.querySelector('.heart-label').textContent = this.classList.contains('saved') ? 'Sparat' : 'Spara'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span class="heart-label">Spara</span>
+    </button>
+  </div>
+
+</div>
+
+</body>
+</html>

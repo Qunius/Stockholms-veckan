@@ -1,0 +1,29 @@
+{"type":"server-started","port":56192,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:56192","screen_dir":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/data-categories.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      Events & Culture\n      Concerts, exhibitions, theatre, festivals — what's on today and this week","choice":"events","id":null,"timestamp":1774262951850}
+{"source":"user-event","type":"click","text":"E\n    \n      Restaurants & Nightlife\n      Open now, popular spots, today's lunch menus, bar activity","choice":"restaurants","id":null,"timestamp":1774262960555}
+{"source":"user-event","type":"click","text":"B\n    \n      Weather\n      Current conditions, temperature, wind, precipitation, forecast","choice":"weather","id":null,"timestamp":1774262962867}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/layout-vibe.html"}
+{"source":"user-event","type":"click","text":"B\n    \n      City Guide / Discovery\n      Explore what's going on — rich cards, event browsing, restaurant details. Like a local \"what to do\" magazine","choice":"city-guide","id":null,"timestamp":1774263014421}
+{"source":"user-event","type":"click","text":"A\n    \n      Personal Dashboard\n      A daily overview I open in the morning — compact, scannable, all key info at a glance on desktop/browser","choice":"personal-dashboard","id":null,"timestamp":1774263014729}
+{"source":"user-event","type":"click","text":"B\n    \n      City Guide / Discovery\n      Explore what's going on — rich cards, event browsing, restaurant details. Like a local \"what to do\" magazine","choice":"city-guide","id":null,"timestamp":1774263020646}
+{"source":"user-event","type":"click","text":"B\n    \n      City Guide / Discovery\n      Explore what's going on — rich cards, event browsing, restaurant details. Like a local \"what to do\" magazine","choice":"city-guide","id":null,"timestamp":1774263026414}
+{"source":"user-event","type":"click","text":"B\n    \n      City Guide / Discovery\n      Explore what's going on — rich cards, event browsing, restaurant details. Like a local \"what to do\" magazine","choice":"city-guide","id":null,"timestamp":1774263026474}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/visual-style.html"}
+{"source":"user-event","type":"click","text":"Tonight in Stockholm\n        Jazz at Fasching\n      \n      \n        3°C ☁\n        🍴 Open Now\n      \n    \n    \n      Colorful & Vivid\n      Swedish blue/yellow palette, bold cards, rounded corners. Friendly and energetic.","choice":"colorful-vivid","id":null,"timestamp":1774263064477}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/waiting.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/layout-design.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/scandinavian-mockup.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/scandinavian-mockup-v2.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/scandinavian-mockup-v3.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/scandinavian-mockup-v4.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/personal-energy-mockup.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/personal-energy-mockup-v2.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/personal-energy-mockup-v3.html"}
+{"type":"screen-updated","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/personal-energy-mockup-v3.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/waiting-2.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/full-preview.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/full-preview-v2.html"}
+{"type":"screen-updated","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/full-preview-v2.html"}
+{"type":"screen-added","file":"/Users/pavel/VS-code/.superpowers/brainstorm/52843-1774262904/social-profile.html"}
+{"type":"server-stopped","reason":"idle timeout"}

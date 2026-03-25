@@ -1,0 +1,23 @@
+{
+  "name": "vs-code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "TZ=Europe/Stockholm node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "TZ=Europe/Stockholm node --experimental-vm-modules node_modules/.bin/jest --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@jest/globals": "^30.3.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "node-fetch": "^3.3.2"
+  }
+}

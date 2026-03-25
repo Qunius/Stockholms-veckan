@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hello World Button</title>
+    <style>
+      body {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+      }
+      #hello-button {
+        font-size: 1.2rem;
+        padding: 12px 24px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="hello-button">Hello World</button>
+
+    <script>
+      const button = document.getElementById('hello-button');
+      button.addEventListener('click', () => {
+        alert('Hello World');
+        console.log('Hello World button clicked');
+      });
+    </script>
+  </body>
+</html>

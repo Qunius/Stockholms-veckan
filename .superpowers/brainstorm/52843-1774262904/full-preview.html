@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockholm den här veckan</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F8F7F4;
+    --surface: #fff;
+    --border: #E2DED8;
+    --text: #111;
+    --muted: #777;
+    --accent: #5B3FE8;
+    --accent2: #F0522A;
+    --green: #00B37D;
+  }
+  body { font-family: -apple-system,'Helvetica Neue',Arial,sans-serif; background:var(--bg); color:var(--text); }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { font-family:'Georgia',serif; font-size:20px; letter-spacing:-0.5px; }
+  .logo small { display:block; font-family:-apple-system,Arial,sans-serif; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-top:1px; }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .saved-count {
+    font-size:12px; color:var(--muted);
+    display:flex; align-items:center; gap:5px;
+  }
+  .saved-count svg { width:14px; height:14px; }
+  .tipsa-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: background .15s;
+  }
+  .tipsa-btn:hover { background: #4a30d4; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 48px 32px 36px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .hero-eyebrow { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:10px; }
+  .hero h1 { font-family:'Georgia',serif; font-size:52px; font-weight:400; line-height:1.0; letter-spacing:-2px; margin-bottom:12px; }
+  .hero h1 em { font-style:italic; color:var(--accent2); }
+  .hero-sub { font-size:15px; color:#555; line-height:1.6; max-width:500px; }
+
+  /* ── WEATHER BAR ── */
+  .weather-bar {
+    background: var(--accent);
+    padding: 10px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    overflow-x: auto;
+  }
+  .weather-bar-label { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.6); white-space:nowrap; }
+  .weather-day {
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    min-width:52px;
+  }
+  .weather-day .wd-name { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.6); }
+  .weather-day svg { width:22px; height:22px; }
+  .weather-day .wd-temp { font-size:13px; font-weight:700; color:#fff; }
+
+  /* ── FILTERS ── */
+  .filters {
+    padding: 12px 32px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .filter-tab { font-size:12px; padding:6px 16px; border:1.5px solid var(--border); border-radius:20px; cursor:pointer; background:transparent; color:#555; transition: all .15s; }
+  .filter-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .filter-count { font-size:10px; background:rgba(255,255,255,0.25); border-radius:10px; padding:1px 5px; margin-left:3px; }
+
+  /* ── EVENT LIST ── */
+  .event-list { max-width:880px; margin:0 auto; padding:0 32px 80px; }
+
+  .event-item {
+    padding:32px 0;
+    border-bottom:1px solid var(--border);
+    display:grid;
+    grid-template-columns:190px 1fr 72px;
+    gap:24px;
+    align-items:start;
+  }
+  .event-item[style*="none"] { display:none !important; }
+
+  .event-item.featured {
+    background:var(--surface);
+    border-radius:6px;
+    margin:28px -20px 0;
+    padding:28px;
+    border:none;
+    border-top:3px solid var(--accent);
+    box-shadow:0 4px 24px rgba(0,0,0,0.07);
+  }
+
+  .event-image-wrap { position:relative; }
+  .event-image { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; border-radius:2px; }
+
+  /* Source chip on image */
+  .source-chip {
+    position:absolute; top:8px; left:8px;
+    background:rgba(0,0,0,0.6);
+    color:#fff;
+    font-size:9px;
+    letter-spacing:0.8px;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:2px;
+    backdrop-filter:blur(4px);
+  }
+  .source-chip.sanity { background:rgba(245,70,45,0.85); }
+  .source-chip.usertip { background:rgba(0,179,125,0.9); }
+
+  .event-body { display:flex; flex-direction:column; gap:8px; }
+
+  .event-meta { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .category { color:var(--accent); font-weight:600; }
+
+  .badge { font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; padding:3px 8px; border-radius:3px; }
+  .badge-popup { background:#FFF3CD; color:#7A5700; }
+  .badge-deal  { background:#FFE8E4; color:#B8280A; }
+  .badge-today { background:var(--accent); color:#fff; }
+  .badge-free  { background:#D6F5EB; color:#0A6B45; }
+  .badge-new   { background:#EEE9FF; color:var(--accent); }
+  .badge-night { background:#1A1035; color:#A98EFF; }
+  .badge-tip   { background:#D6F5EB; color:#0A6B45; }
+
+  .event-title { font-family:'Georgia',serif; font-size:24px; font-weight:400; letter-spacing:-0.3px; line-height:1.2; }
+  .event-desc  { font-size:15px; color:#444; line-height:1.7; }
+  .event-location a { font-size:13px; color:var(--muted); text-decoration:none; border-bottom:1px solid transparent; transition:color .15s,border-color .15s; }
+  .event-location a::before { content:"↗ "; font-size:11px; opacity:0.5; }
+  .event-location a:hover { color:var(--accent2); border-bottom-color:var(--accent2); }
+
+  /* ── ACTIONS COLUMN ── */
+  .event-actions { display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:4px; }
+  .weather-block { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .weather-block svg { width:30px; height:30px; }
+  .weather-temp { font-size:14px; font-weight:700; letter-spacing:-0.3px; }
+  .weather-desc { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; text-align:center; }
+  .actions-divider { width:28px; height:1px; background:var(--border); }
+  .heart-btn { background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .heart-btn svg.hi { width:22px; height:22px; }
+  .heart-label { font-size:9px; letter-spacing:0.8px; color:#AAA; text-transform:uppercase; }
+  .heart-btn:hover .hi path, .heart-btn.saved .hi path { fill:var(--accent2); stroke:var(--accent2); }
+  .heart-btn.saved .heart-label { color:var(--accent2); }
+
+  /* ── TIP MODAL ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.5);
+    z-index:1000;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--surface);
+    border-radius:6px;
+    padding:36px;
+    width:100%;
+    max-width:480px;
+    margin:16px;
+  }
+  .modal h2 { font-family:'Georgia',serif; font-size:28px; font-weight:400; letter-spacing:-0.5px; margin-bottom:6px; }
+  .modal p { font-size:14px; color:var(--muted); margin-bottom:24px; line-height:1.5; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .form-group input, .form-group textarea, .form-group select {
+    width:100%; padding:10px 12px;
+    border:1.5px solid var(--border);
+    border-radius:3px;
+    font-size:14px;
+    font-family:-apple-system,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:border-color .15s;
+  }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline:none; border-color:var(--accent);
+  }
+  .form-group textarea { height:80px; resize:vertical; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+  .btn-cancel { background:none; border:1.5px solid var(--border); border-radius:3px; padding:9px 18px; font-size:13px; cursor:pointer; color:var(--muted); }
+  .btn-submit { background:var(--accent); color:#fff; border:none; border-radius:3px; padding:9px 20px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-submit:hover { background:#4a30d4; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align:center; padding:64px 32px; color:var(--muted); display:none; }
+  .empty-state h3 { font-family:'Georgia',serif; font-size:22px; font-weight:400; margin-bottom:8px; color:var(--text); }
+  .empty-state p { font-size:14px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">Stockholm <small>Den här veckan</small></div>
+  <div class="header-right">
+    <div class="saved-count" id="savedCount">
+      <svg viewBox="0 0 24 24" fill="#F0522A" stroke="#F0522A" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+      <span>2 sparade</span>
+    </div>
+    <button class="tipsa-btn" onclick="openModal()">+ Tipsa oss</button>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow">Vecka 13 · 23–29 mars 2026</div>
+  <h1>Vad händer<br>i <em>Stockholm</em></h1>
+  <p class="hero-sub">Evenemang, pop-ups, fynd och upplevelser — hämtat från Ticketmaster, Visit Stockholm, Songkick och era egna tips.</p>
+</div>
+
+<!-- ── WEEKLY WEATHER BAR ── -->
+<div class="weather-bar">
+  <span class="weather-bar-label">Vädret denna vecka</span>
+  <div class="weather-day">
+    <span class="wd-name">Mån</span>
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6" fill="#F5A623"/><line x1="16" y1="3" x2="16" y2="7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25" x2="16" y2="29" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="16" x2="7" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25" y1="16" x2="29" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="6.3" y1="6.3" x2="9.2" y2="9.2" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="22.8" y1="22.8" x2="25.7" y2="25.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.7" y1="6.3" x2="22.8" y2="9.2" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="9.2" y1="22.8" x2="6.3" y2="25.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="wd-temp">3°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Tis</span>
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="13" cy="13" r="5" fill="#F5A623"/><line x1="13" y1="4" x2="13" y2="7" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="13" x2="7" y2="13" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="6.5" y1="6.5" x2="8.6" y2="8.6" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="19.4" y1="8.6" x2="21.5" y2="6.5" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><path d="M22 19C22 19 21.5 14.5 17 14.5C13.2 14.5 12 17.5 12 17.5C12 17.5 9.5 17.5 8.7 19.5C7.9 21.5 9.5 23.5 12 23.5H22C24 23.5 25.5 22 25.5 20.5C25.5 18.5 24 17.5 22 19Z" fill="#B8CEDF" stroke="#A0BCCF" stroke-width="0.5"/></svg>
+    <span class="wd-temp">6°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Ons</span>
+    <svg viewBox="0 0 32 32" fill="none"><path d="M8 18C5.8 18 4 16.4 4 14.4C4 12.6 5.3 11.1 7 10.8C7 10.5 7 10.3 7 10C7 7.2 9.2 5 12 5C14.1 5 15.9 6.3 16.7 8.1C17.1 8 17.5 8 18 8C21.3 8 24 10.7 24 14C24 14 24 14 24 14.1C25.7 14.5 27 16.1 27 18C27 20.2 25.2 22 23 22H8C5.8 22 4 20.2 4 18Z" fill="#B0BEC5" stroke="#90A4AE" stroke-width="0.5"/></svg>
+    <span class="wd-temp">4°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Tor</span>
+    <svg viewBox="0 0 32 32" fill="none"><path d="M24 13.5C24 13.5 23.5 8 18 8C13.5 8 12 11.5 12 11.5C12 11.5 9 11.5 8 14C7 16.5 9 19 12 19H24C26.5 19 28 17.2 28 15.5C28 13.2 26 12 24 13.5Z" fill="#90A8C3" stroke="#7A96B5" stroke-width="0.5"/><line x1="12" y1="22" x2="10" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="22" x2="15" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="22" y1="22" x2="20" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="wd-temp">3°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Fre</span>
+    <svg viewBox="0 0 32 32" fill="none"><path d="M24 13.5C24 13.5 23.5 8 18 8C13.5 8 12 11.5 12 11.5C12 11.5 9 11.5 8 14C7 16.5 9 19 12 19H24C26.5 19 28 17.2 28 15.5C28 13.2 26 12 24 13.5Z" fill="#90A8C3" stroke="#7A96B5" stroke-width="0.5"/><line x1="12" y1="22" x2="10" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="22" x2="15" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="22" y1="22" x2="20" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="wd-temp">5°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Lör</span>
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6.5" fill="#F5A623"/><line x1="16" y1="2" x2="16" y2="6.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25.5" x2="16" y2="30" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="16" x2="6.5" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.5" y1="16" x2="30" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="5.5" y1="5.5" x2="8.7" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="23.3" y1="23.3" x2="26.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="26.5" y1="5.5" x2="23.3" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="8.7" y1="23.3" x2="5.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="wd-temp">9°C</span>
+  </div>
+  <div class="weather-day">
+    <span class="wd-name">Sön</span>
+    <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6.5" fill="#F5A623"/><line x1="16" y1="2" x2="16" y2="6.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25.5" x2="16" y2="30" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="16" x2="6.5" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.5" y1="16" x2="30" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="5.5" y1="5.5" x2="8.7" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="23.3" y1="23.3" x2="26.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="26.5" y1="5.5" x2="23.3" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="8.7" y1="23.3" x2="5.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+    <span class="wd-temp">7°C</span>
+  </div>
+</div>
+
+<!-- ── FILTERS ── -->
+<div class="filters">
+  <button class="filter-tab active" data-filter="allt">Allt <span class="filter-count" id="count-allt">8</span></button>
+  <button class="filter-tab" data-filter="musik">Musik</button>
+  <button class="filter-tab" data-filter="konst">Konst</button>
+  <button class="filter-tab" data-filter="mat">Mat & dryck</button>
+  <button class="filter-tab" data-filter="pop-up">Pop-up & marknad</button>
+  <button class="filter-tab" data-filter="fynd">Fynd & rea</button>
+  <button class="filter-tab" data-filter="uteliv">Uteliv</button>
+  <button class="filter-tab" data-filter="sport">Sport</button>
+</div>
+
+<!-- ── EVENT LIST ── -->
+<div class="event-list">
+  <div class="empty-state" id="emptyState">
+    <h3>Inga evenemang här</h3>
+    <p>Prova en annan kategori — eller tipsa oss om något vi missat.</p>
+  </div>
+
+  <!-- 1. Hornstull pop-up — SANITY/curated -->
+  <div class="event-item featured" data-category="pop-up">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip sanity">Redaktionellt</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta">
+        <span class="category">Pop-up & mat</span>
+        <span>Lör–Sön 28–29 mars · 12:00–20:00</span>
+        <span class="badge badge-today">I helgen</span>
+        <span class="badge badge-free">Gratis</span>
+      </div>
+      <div class="event-title">Hornstulls Strandbod — Säsongsöppning</div>
+      <div class="event-desc">Den populära streetfoodmarknaden på Hornstull öppnar för säsongen. Koreansk BBQ, tamales och husmanskost från Södermalm. Gratis inträde, kontanter och Swish.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Hornstulls+strand,+Stockholm" target="_blank">Hornstulls strand, Södermalm</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6.5" fill="#F5A623"/><line x1="16" y1="2" x2="16" y2="6.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25.5" x2="16" y2="30" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="16" x2="6.5" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.5" y1="16" x2="30" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="5.5" y1="5.5" x2="8.7" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="23.3" y1="23.3" x2="26.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="26.5" y1="5.5" x2="23.3" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="8.7" y1="23.3" x2="5.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="weather-temp">9°C</span><span class="weather-desc">Soligt</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Filippa K — SANITY -->
+  <div class="event-item" data-category="fynd">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip sanity">Redaktionellt</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Fynd & rea</span><span>Fre–Lör 27–28 mars · 09:00–18:00</span><span class="badge badge-deal">Lagertömning</span></div>
+      <div class="event-title">Filippa K — Lagertömning Kungsholmen</div>
+      <div class="event-desc">Direkt från lagret — prover, överskottslager och förra säsongens kollektion till upp till 80% rabatt. Inga returer. Kom tidigt.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Fleminggatan+20,+Stockholm" target="_blank">Fleminggatan 20, Kungsholmen</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M24 13.5C24 13.5 23.5 8 18 8C13.5 8 12 11.5 12 11.5C12 11.5 9 11.5 8 14C7 16.5 9 19 12 19H24C26.5 19 28 17.2 28 15.5C28 13.2 26 12 24 13.5Z" fill="#90A8C3" stroke="#7A96B5" stroke-width="0.5"/><line x1="12" y1="22" x2="10" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="22" x2="15" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/><line x1="22" y1="22" x2="20" y2="26" stroke="#5B8FB9" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="weather-temp">5°C</span><span class="weather-desc">Regn</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn saved" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="#F0522A" stroke="#F0522A" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Sparat</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Trädgården — Ticketmaster -->
+  <div class="event-item" data-category="uteliv">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip">Ticketmaster</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Uteliv</span><span>Fredag 27 mars · 23:00</span><span class="badge badge-night">Natt</span></div>
+      <div class="event-title">Trädgården — Säsongsöppning</div>
+      <div class="event-desc">Stockholms mest ikoniska uteklubb öppnar för sommarsäsongen. Två scener, internationella DJs. Biljetter slutsålda — kolla Ticketswap.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Trädgården+Stockholm" target="_blank">Hammarby Sjöstad, Södermalm</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 6C10.48 6 6 10.48 6 16C6 21.52 10.48 26 16 26C21.52 26 26 21.52 26 16C26 10.48 21.52 6 16 6ZM16 8C18.5 8 20.8 9.1 22.4 10.8C20.3 11.3 18.5 12.8 17.6 14.8C16.2 13.8 14.4 13.3 12.5 13.5C11.5 11.5 11.3 9.3 12 7.4C13.3 7.1 14.6 8 16 8Z" fill="#A78BFA"/><circle cx="16" cy="16" r="3" fill="#DDD6FE" opacity="0.5"/></svg>
+        <span class="weather-temp">2°C</span><span class="weather-desc">Klart</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. Galleri — Visit Stockholm -->
+  <div class="event-item" data-category="konst">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1578926375605-eaf7559b1458?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip">Visit Stockholm</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Konst</span><span>23–29 mars · 11:00–18:00</span><span class="badge badge-free">Gratis</span></div>
+      <div class="event-title">Galleri Nordenhake — Nytt kollektiv</div>
+      <div class="event-desc">Vernissage torsdag kväll, öppet hela veckan. Fem unga nordiska konstnärer utforskar digitala identiteter och fysiska material.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Hudiksvallsgatan+8,+Stockholm" target="_blank">Hudiksvallsgatan 8, Vasastan</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M8 18C5.8 18 4 16.4 4 14.4C4 12.6 5.3 11.1 7 10.8C7 10.5 7 10.3 7 10C7 7.2 9.2 5 12 5C14.1 5 15.9 6.3 16.7 8.1C17.1 8 17.5 8 18 8C21.3 8 24 10.7 24 14C24 14 24 14 24 14.1C25.7 14.5 27 16.1 27 18C27 20.2 25.2 22 23 22H8C5.8 22 4 20.2 4 18Z" fill="#B0BEC5" stroke="#90A4AE" stroke-width="0.5"/></svg>
+        <span class="weather-temp">4°C</span><span class="weather-desc">Mulet</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Jazz — Songkick -->
+  <div class="event-item" data-category="musik">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip">Songkick</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Musik</span><span>Måndag 24 mars · 21:00</span><span class="badge badge-new">Nytt</span></div>
+      <div class="event-title">Jazz på Fasching</div>
+      <div class="event-desc">En av Stockholms mest älskade jazzklubbar. Ikväll: känd svensk jazzkvartett. Intim stämning, bra ljud. Boka biljett i förväg.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Kungsgatan+63,+Stockholm" target="_blank">Kungsgatan 63, Norrmalm</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="13" cy="13" r="5" fill="#F5A623"/><line x1="13" y1="4" x2="13" y2="7" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="13" x2="7" y2="13" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="6.5" y1="6.5" x2="8.6" y2="8.6" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><line x1="19.4" y1="8.6" x2="21.5" y2="6.5" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round"/><path d="M22 19C22 19 21.5 14.5 17 14.5C13.2 14.5 12 17.5 12 17.5C12 17.5 9.5 17.5 8.7 19.5C7.9 21.5 9.5 23.5 12 23.5H22C24 23.5 25.5 22 25.5 20.5C25.5 18.5 24 17.5 22 19Z" fill="#B8CEDF" stroke="#A0BCCF" stroke-width="0.5"/></svg>
+        <span class="weather-temp">3°C</span><span class="weather-desc">Molnigt</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn saved" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="#F0522A" stroke="#F0522A" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Sparat</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 6. Midnight Runners — user tip -->
+  <div class="event-item" data-category="sport">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip usertip">Läsartips</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Sport</span><span>Tisdag 25 mars · 18:30</span><span class="badge badge-free">Gratis</span><span class="badge badge-tip">Läsartips</span></div>
+      <div class="event-title">Midnight Runners Stockholm — Vårens första träff</div>
+      <div class="event-desc">Det globala löparsällskapet samlas för en 8 km-runda genom Södermalm. Alla nivåer välkomna. Ingen anmälan — dyk bara upp.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Medborgarplatsen,+Stockholm" target="_blank">Medborgarplatsen, Södermalm</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6" fill="#F5A623"/><line x1="16" y1="3" x2="16" y2="7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25" x2="16" y2="29" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="16" x2="7" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25" y1="16" x2="29" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="6.3" y1="6.3" x2="9.2" y2="9.2" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="22.8" y1="22.8" x2="25.7" y2="25.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.7" y1="6.3" x2="22.8" y2="9.2" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="9.2" y1="22.8" x2="6.3" y2="25.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="weather-temp">6°C</span><span class="weather-desc">Klart</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. Bar Riviera — SANITY -->
+  <div class="event-item" data-category="mat">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1470338745628-171cf53de3a8?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip sanity">Redaktionellt</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Mat & dryck</span><span>Ons–Lör 26–29 mars · 17:00–01:00</span><span class="badge badge-popup">Pop-up</span></div>
+      <div class="event-title">Bar Riviera — Pop-up i Östermalm</div>
+      <div class="event-desc">Göteborgsbaserade barteamet bakom Riviera tar över en källarlokal i fyra kvällar. Säsongsbaserade cocktails och naturvin.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Riddargatan+17,+Stockholm" target="_blank">Riddargatan 17, Östermalm</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M8 16C5.8 16 4 14.4 4 12.4C4 10.6 5.3 9.1 7 8.8C7 8.5 7 8.3 7 8C7 5.2 9.2 3 12 3C14.1 3 15.9 4.3 16.7 6.1C17.1 6 17.5 6 18 6C21.3 6 24 8.7 24 12C24 12 24 12 24 12.1C25.7 12.5 27 14.1 27 16C27 18.2 25.2 20 23 20H8C5.8 20 4 18.2 4 16Z" fill="#CFD8DC" stroke="#B0BEC5" stroke-width="0.5"/><circle cx="11" cy="24" r="1.5" fill="#90CAF9"/><circle cx="16" cy="26" r="1.5" fill="#90CAF9"/><circle cx="21" cy="24" r="1.5" fill="#90CAF9"/></svg>
+        <span class="weather-temp">0°C</span><span class="weather-desc">Snöbyar</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. Loppis — user tip -->
+  <div class="event-item" data-category="pop-up">
+    <div class="event-image-wrap">
+      <img class="event-image" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop" alt="">
+      <span class="source-chip usertip">Läsartips</span>
+    </div>
+    <div class="event-body">
+      <div class="event-meta"><span class="category">Pop-up & marknad</span><span>Söndag 29 mars · 10:00–15:00</span><span class="badge badge-free">Gratis</span><span class="badge badge-tip">Läsartips</span></div>
+      <div class="event-title">Loppmarknad i Gamla Stan</div>
+      <div class="event-desc">Lokala säljare i Gamla Stans bakgator. Retrokläder, keramik, böcker och prylar du inte visste att du behövde. Ta med kontanter.</div>
+      <div class="event-location"><a href="https://maps.google.com/?q=Stortorget,+Gamla+Stan,+Stockholm" target="_blank">Stortorget, Gamla Stan</a></div>
+    </div>
+    <div class="event-actions">
+      <div class="weather-block">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="6.5" fill="#F5A623"/><line x1="16" y1="2" x2="16" y2="6.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25.5" x2="16" y2="30" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="16" x2="6.5" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="25.5" y1="16" x2="30" y2="16" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="5.5" y1="5.5" x2="8.7" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="23.3" y1="23.3" x2="26.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="26.5" y1="5.5" x2="23.3" y2="8.7" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/><line x1="8.7" y1="23.3" x2="5.5" y2="26.5" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="weather-temp">7°C</span><span class="weather-desc">Klart</span>
+      </div>
+      <div class="actions-divider"></div>
+      <button class="heart-btn" onclick="toggleSave(this)">
+        <svg class="hi" viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/></svg>
+        <span class="heart-label">Spara</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TIP MODAL ── -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2>Tipsa oss</h2>
+    <p>Vet du om något vi missat? Skicka in ett tips — vi granskar det och publicerar om det passar.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Ditt namn</label>
+        <input type="text" placeholder="Anna Svensson">
+      </div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select>
+          <option>Pop-up & marknad</option>
+          <option>Musik</option>
+          <option>Konst</option>
+          <option>Mat & dryck</option>
+          <option>Fynd & rea</option>
+          <option>Sport</option>
+          <option>Uteliv</option>
+          <option>Annat</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Evenemang</label>
+      <input type="text" placeholder="Vad heter det?">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Datum & tid</label>
+        <input type="text" placeholder="Lördag 28 mars · 14:00">
+      </div>
+      <div class="form-group">
+        <label>Plats</label>
+        <input type="text" placeholder="Adress eller område">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Beskriv det kort</label>
+      <textarea placeholder="Vad är det? Varför ska folk gå dit?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Avbryt</button>
+      <button class="btn-submit" onclick="submitTip()">Skicka tips</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Save toggle + counter ──
+  function toggleSave(btn) {
+    btn.classList.toggle('saved');
+    const label = btn.querySelector('.heart-label');
+    const isSaved = btn.classList.contains('saved');
+    label.textContent = isSaved ? 'Sparat' : 'Spara';
+    btn.querySelector('.hi').setAttribute('fill', isSaved ? '#F0522A' : 'none');
+    btn.querySelector('.hi').setAttribute('stroke', isSaved ? '#F0522A' : '#C8C2B8');
+    updateSavedCount();
+  }
+  function updateSavedCount() {
+    const n = document.querySelectorAll('.heart-btn.saved').length;
+    document.querySelector('#savedCount span').textContent = n === 0 ? 'Inga sparade' : n + ' spara' + (n === 1 ? 't' : 'de');
+  }
+
+  // ── Filters ──
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      let visible = 0;
+      document.querySelectorAll('.event-item').forEach(item => {
+        const show = filter === 'allt' || item.dataset.category === filter;
+        item.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      document.getElementById('emptyState').style.display = visible === 0 ? 'block' : 'none';
+    });
+  });
+
+  // ── Modal ──
+  function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+  function submitTip()  {
+    closeModal();
+    alert('Tack för tipset! Vi granskar det och publicerar om det passar.');
+  }
+</script>
+</body>
+</html>

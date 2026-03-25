@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Social — Profil</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F8F7F4; --surface: #fff; --border: #E2DED8;
+    --text: #111; --muted: #777; --accent: #5B3FE8; --accent2: #F0522A;
+  }
+  body { font-family: -apple-system,'Helvetica Neue',Arial,sans-serif; background:var(--bg); color:var(--text); }
+
+  /* NAV */
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+  .logo { font-family:'Georgia',serif; font-size:20px; letter-spacing:-0.5px; }
+  .logo small { display:block; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:var(--muted); margin-top:1px; }
+  nav { display:flex; gap:4px; }
+  .nav-item { font-size:12px; padding:7px 14px; border-radius:20px; color:var(--muted); cursor:pointer; text-decoration:none; }
+  .nav-item.active { background:var(--accent); color:#fff; }
+  .nav-item:hover:not(.active) { background:#f0eef8; color:var(--accent); }
+
+  /* LAYOUT */
+  .page { max-width:920px; margin:0 auto; padding:32px; display:grid; grid-template-columns:260px 1fr; gap:32px; align-items:start; }
+
+  /* LEFT: PROFILE CARD */
+  .profile-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:28px; position:sticky; top:80px; }
+  .avatar { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#9B7AFF); display:flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:14px; }
+  .profile-name { font-family:'Georgia',serif; font-size:22px; font-weight:400; letter-spacing:-0.3px; margin-bottom:2px; }
+  .profile-handle { font-size:12px; color:var(--muted); margin-bottom:16px; }
+
+  /* Karma display */
+  .karma-block { background:linear-gradient(135deg,var(--accent),#8B6FFF); border-radius:6px; padding:16px; margin-bottom:16px; color:#fff; }
+  .karma-label { font-size:10px; letter-spacing:2px; text-transform:uppercase; opacity:0.7; margin-bottom:4px; }
+  .karma-value { font-size:36px; font-weight:700; letter-spacing:-1px; line-height:1; }
+  .karma-sub { font-size:11px; opacity:0.7; margin-top:4px; }
+
+  /* Karma breakdown */
+  .karma-breakdown { margin-bottom:16px; }
+  .karma-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .karma-row:last-child { border:none; }
+  .karma-row .k-label { color:var(--muted); }
+  .karma-row .k-val { font-weight:600; color:var(--accent); }
+
+  .profile-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+  .stat-box { text-align:center; background:var(--bg); border-radius:4px; padding:10px 8px; }
+  .stat-box .s-val { font-size:18px; font-weight:700; letter-spacing:-0.5px; }
+  .stat-box .s-label { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-top:2px; }
+
+  /* RIGHT: FEED */
+  .feed-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .feed-header h2 { font-family:'Georgia',serif; font-size:24px; font-weight:400; letter-spacing:-0.5px; }
+  .feed-tabs { display:flex; gap:6px; }
+  .feed-tab { font-size:12px; padding:5px 14px; border:1.5px solid var(--border); border-radius:20px; cursor:pointer; background:transparent; color:#555; }
+  .feed-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+  /* Shared event card */
+  .share-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; margin-bottom:12px; overflow:hidden; }
+  .share-card-header { padding:14px 16px 0; display:flex; align-items:center; gap:10px; }
+  .share-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent),#9B7AFF); display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; font-weight:600; }
+  .share-meta { flex:1; }
+  .share-meta .s-name { font-size:13px; font-weight:600; }
+  .share-meta .s-time { font-size:11px; color:var(--muted); }
+  .share-comment { padding:10px 16px 12px; font-size:14px; color:#333; line-height:1.5; }
+
+  /* Embedded event preview */
+  .event-preview { margin:0 16px 16px; border:1px solid var(--border); border-radius:4px; display:grid; grid-template-columns:90px 1fr; overflow:hidden; }
+  .event-preview img { width:90px; height:72px; object-fit:cover; display:block; }
+  .event-preview-body { padding:10px 12px; }
+  .ep-cat { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:600; margin-bottom:3px; }
+  .ep-title { font-family:'Georgia',serif; font-size:14px; font-weight:400; line-height:1.2; margin-bottom:3px; }
+  .ep-date { font-size:11px; color:var(--muted); }
+
+  /* Vote + share actions */
+  .share-actions { padding:10px 16px 12px; display:flex; align-items:center; gap:16px; border-top:1px solid var(--border); }
+  .vote-btn { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); cursor:pointer; background:none; border:none; padding:4px 8px; border-radius:20px; transition:all .15s; }
+  .vote-btn:hover { background:#EEE9FF; color:var(--accent); }
+  .vote-btn.voted { background:#EEE9FF; color:var(--accent); font-weight:600; }
+  .vote-btn svg { width:14px; height:14px; }
+  .share-btn { margin-left:auto; font-size:12px; color:var(--muted); cursor:pointer; background:none; border:none; padding:4px 8px; border-radius:20px; }
+  .share-btn:hover { background:var(--bg); color:var(--text); }
+
+  /* Karma badge on card */
+  .karma-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; color:var(--accent); background:#EEE9FF; border-radius:20px; padding:3px 10px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Stockholm <small>Den här veckan</small></div>
+  <nav>
+    <a class="nav-item" href="#">Evenemang</a>
+    <a class="nav-item active" href="#">Community</a>
+    <a class="nav-item" href="#">Mina sparade</a>
+  </nav>
+</header>
+
+<div class="page">
+
+  <!-- LEFT: Profile -->
+  <div>
+    <div class="profile-card">
+      <div class="avatar">🦊</div>
+      <div class="profile-name">Sofia Lindgren</div>
+      <div class="profile-handle">@sofialindgren · Stockholm</div>
+
+      <div class="karma-block">
+        <div class="karma-label">Karma</div>
+        <div class="karma-value">1 840</div>
+        <div class="karma-sub">Top 5% den här månaden</div>
+      </div>
+
+      <div class="karma-breakdown">
+        <div class="karma-row"><span class="k-label">Godkända tips</span><span class="k-val">+1 200</span></div>
+        <div class="karma-row"><span class="k-label">Delningar som gillas</span><span class="k-val">+480</span></div>
+        <div class="karma-row"><span class="k-label">Upvotes mottagna</span><span class="k-val">+160</span></div>
+      </div>
+
+      <div class="profile-stats">
+        <div class="stat-box"><div class="s-val">12</div><div class="s-label">Tips</div></div>
+        <div class="stat-box"><div class="s-val">34</div><div class="s-label">Delningar</div></div>
+        <div class="stat-box"><div class="s-val">89</div><div class="s-label">Följare</div></div>
+        <div class="stat-box"><div class="s-val">47</div><div class="s-label">Följer</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Feed -->
+  <div>
+    <div class="feed-header">
+      <h2>Community-flöde</h2>
+      <div class="feed-tabs">
+        <button class="feed-tab active">Senaste</button>
+        <button class="feed-tab">Populärt</button>
+        <button class="feed-tab">Följer</button>
+      </div>
+    </div>
+
+    <!-- Shared event 1 -->
+    <div class="share-card">
+      <div class="share-card-header">
+        <div class="share-avatar">S</div>
+        <div class="share-meta">
+          <div class="s-name">Sofia Lindgren <span class="karma-badge">⬆ 1 840 karma</span></div>
+          <div class="s-time">För 2 timmar sedan</div>
+        </div>
+      </div>
+      <div class="share-comment">Var här förra säsongen och det var magiskt — kommer definitivt tillbaka i helgen. Kom tidigt för det fylls upp snabbt! 🌞</div>
+      <div class="event-preview">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=180&h=144&fit=crop" alt="">
+        <div class="event-preview-body">
+          <div class="ep-cat">Pop-up & mat</div>
+          <div class="ep-title">Hornstulls Strandbod — Säsongsöppning</div>
+          <div class="ep-date">Lör–Sön 28–29 mars · 12:00–20:00</div>
+        </div>
+      </div>
+      <div class="share-actions">
+        <button class="vote-btn voted">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2l2.5 5h5l-4 3.5 1.5 5.5L8 13l-5 3 1.5-5.5L.5 7h5z"/></svg>
+          24 upvotes
+        </button>
+        <button class="vote-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14l-5-3 1.5-5.5L.5 7h5L8 2l2.5 5h5l-4 3.5 1.5 5.5z"/></svg>
+          Downvote
+        </button>
+        <button class="share-btn">↗ Dela vidare</button>
+      </div>
+    </div>
+
+    <!-- Shared event 2 -->
+    <div class="share-card">
+      <div class="share-card-header">
+        <div class="share-avatar" style="background:linear-gradient(135deg,#F0522A,#FF8C5A);">M</div>
+        <div class="share-meta">
+          <div class="s-name">Marcus Ek <span class="karma-badge">⬆ 420 karma</span></div>
+          <div class="s-time">För 5 timmar sedan</div>
+        </div>
+      </div>
+      <div class="share-comment">Älskar Fasching. Har sett den här kvartetten tre gånger och de är alltid på. Boka biljett nu, brukar ta slut.</div>
+      <div class="event-preview">
+        <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=180&h=144&fit=crop" alt="">
+        <div class="event-preview-body">
+          <div class="ep-cat">Musik</div>
+          <div class="ep-title">Jazz på Fasching</div>
+          <div class="ep-date">Måndag 24 mars · 21:00</div>
+        </div>
+      </div>
+      <div class="share-actions">
+        <button class="vote-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l2.5 5h5l-4 3.5 1.5 5.5L8 13l-5 3 1.5-5.5L.5 7h5z"/></svg>
+          11 upvotes
+        </button>
+        <button class="vote-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14l-5-3 1.5-5.5L.5 7h5L8 2l2.5 5h5l-4 3.5 1.5 5.5z"/></svg>
+          Downvote
+        </button>
+        <button class="share-btn">↗ Dela vidare</button>
+      </div>
+    </div>
+
+    <!-- Shared event 3 — user tip -->
+    <div class="share-card">
+      <div class="share-card-header">
+        <div class="share-avatar" style="background:linear-gradient(135deg,#00B37D,#00D4A0);">L</div>
+        <div class="share-meta">
+          <div class="s-name">Lena Björk <span class="karma-badge">⬆ 290 karma</span></div>
+          <div class="s-time">För 8 timmar sedan</div>
+        </div>
+      </div>
+      <div class="share-comment">Tipsade om den här för två veckor sedan och nu är den publicerad! Gratis loppis i Gamla Stan — perfekt söndagsmorgon.</div>
+      <div class="event-preview">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=180&h=144&fit=crop" alt="">
+        <div class="event-preview-body">
+          <div class="ep-cat">Pop-up & marknad</div>
+          <div class="ep-title">Loppmarknad i Gamla Stan</div>
+          <div class="ep-date">Söndag 29 mars · 10:00–15:00</div>
+        </div>
+      </div>
+      <div class="share-actions">
+        <button class="vote-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2l2.5 5h5l-4 3.5 1.5 5.5L8 13l-5 3 1.5-5.5L.5 7h5z"/></svg>
+          8 upvotes
+        </button>
+        <button class="vote-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 14l-5-3 1.5-5.5L.5 7h5L8 2l2.5 5h5l-4 3.5 1.5 5.5z"/></svg>
+          Downvote
+        </button>
+        <button class="share-btn">↗ Dela vidare</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
