@@ -84,7 +84,7 @@ function renderWeatherBar(forecast) {
   const html = days.map(d => `
     <div class="weather-day">
       <span class="weather-day-name">${d.name}</span>
-      <img src="/assets/icons/${d.icon}.svg" alt="${d.icon}" width="22" height="22">
+      <img src="assets/icons/${d.icon}.svg" alt="${d.icon}" width="22" height="22">
       <span class="weather-day-temp">${d.temp}°C</span>
     </div>`).join('');
   weatherBar.insertAdjacentHTML('beforeend', html);

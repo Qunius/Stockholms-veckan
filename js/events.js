@@ -57,25 +57,41 @@ export async function fetchAllEvents(now = new Date()) {
     fetchSanityEvents(),
   ]);
 
-  // Throw only when both sources actually failed — empty results are valid
-  if (apiEvents.status === 'rejected' && sanityEvents.status === 'rejected') {
-    throw new Error('All event sources failed');
+  const bothFailed = apiEvents.status === 'rejected' && sanityEvents.status === 'rejected';
+
+  if (!bothFailed) {
+    const api = apiEvents.status === 'fulfilled' ? apiEvents.value : [];
+    const sanity = sanityEvents.status === 'fulfilled' ? sanityEvents.value : [];
+
+    const merged = deduplicateEvents([...sanity, ...api]);
+    const weekEvents = normaliseWeek(merged, now);
+
+    if (weekEvents.length > 0) {
+      // Spec: if Sanity fails, promote the first chronological API event to featured
+      const sanityFailed = sanityEvents.status === 'rejected';
+      const hasFeatured = weekEvents.some(e => e.featured);
+      if (sanityFailed && !hasFeatured) {
+        weekEvents[0] = { ...weekEvents[0], featured: true };
+      }
+      return sortEvents(weekEvents);
+    }
   }
 
-  const api = apiEvents.status === 'fulfilled' ? apiEvents.value : [];
-  const sanity = sanityEvents.status === 'fulfilled' ? sanityEvents.value : [];
+  // No live events available — fall back to static demo data (used on GitHub Pages)
+  const fallback = await fetchFallbackEvents();
+  if (fallback) return fallback;
+  throw new Error('All event sources failed');
+}
 
-  const merged = deduplicateEvents([...sanity, ...api]);
-  const weekEvents = normaliseWeek(merged, now);
-
-  // Spec: if Sanity fails, promote the first chronological API event to featured
-  const sanityFailed = sanityEvents.status === 'rejected';
-  const hasFeatured = weekEvents.some(e => e.featured);
-  if (sanityFailed && !hasFeatured && weekEvents.length > 0) {
-    weekEvents[0] = { ...weekEvents[0], featured: true };
+async function fetchFallbackEvents() {
+  try {
+    const res = await fetch('data/events.json');
+    if (!res.ok) return null;
+    const events = await res.json();
+    return sortEvents(events);
+  } catch {
+    return null;
   }
-
-  return sortEvents(weekEvents);
 }
 
 async function fetchApiEvents() {

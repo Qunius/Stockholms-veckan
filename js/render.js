@@ -14,7 +14,7 @@ export function renderEventCard(event, weather) {
   const imageHtml = event.imageUrl
     ? `<img class="event-image" src="${esc(event.imageUrl)}" alt="${esc(event.title)}" loading="lazy">`
     : `<div class="event-image-fallback">
-         <img src="/assets/icons/${esc(event.category)}.svg" alt="${esc(event.categoryLabel)}">
+         <img src="assets/icons/${esc(event.category)}.svg" alt="${esc(event.categoryLabel)}">
        </div>`;
 
   const badgesHtml = (event.badges || [])
@@ -23,7 +23,7 @@ export function renderEventCard(event, weather) {
 
   const weatherHtml = weather
     ? `<div class="weather-block">
-         <img src="/assets/icons/${esc(weather.icon)}.svg" alt="${esc(weather.label)}" width="30" height="30">
+         <img src="assets/icons/${esc(weather.icon)}.svg" alt="${esc(weather.label)}" width="30" height="30">
          <span class="weather-temp">${esc(weather.temp)}°C</span>
          <span class="weather-label">${esc(weather.label)}</span>
        </div>
