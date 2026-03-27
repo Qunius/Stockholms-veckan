@@ -12,7 +12,7 @@ export const handler = async () => {
     fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster'),
     fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm'),
     ...(BANDSINTOWN_KEY ? [fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown')] : []),
-    ...(EVENTBRITE_KEY ? [fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite')] : []),
+    ...(EVENTBRITE_KEY ? [fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite', { Authorization: `Bearer ${EVENTBRITE_KEY}` })] : []),
   ];
   const results = await Promise.allSettled(sources);
   const [tm, vs, bt, eb] = results;
@@ -44,11 +44,11 @@ export const handler = async () => {
   };
 };
 
-async function fetchWithTimeout(url, ms, source) {
+async function fetchWithTimeout(url, ms, source, headers = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { signal: controller.signal, headers });
     if (!res.ok) throw new Error(`${res.status}`);
     return res.json().then(d => extractEvents(source, d));
   } finally {
@@ -78,11 +78,10 @@ function visitStockholmUrl(week) {
 
 function eventbriteUrl(week) {
   return `https://www.eventbriteapi.com/v3/events/search/`
-    + `?token=${EVENTBRITE_KEY}`
-    + `&location.address=Stockholm,Sweden`
-    + `&location.within=10km`
-    + `&start_date.range_start=${week.start}`
-    + `&start_date.range_end=${week.end}`
+    + `?location.address=Stockholm,Sweden`
+    + `&location.within=20km`
+    + `&start_date.range_start=${week.start}Z`
+    + `&start_date.range_end=${week.end}Z`
     + `&expand=venue,category`
     + `&page_size=50`;
 }
