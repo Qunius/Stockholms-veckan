@@ -4,6 +4,8 @@ const TICKETMASTER_KEY = process.env.TICKETMASTER_KEY;
 const BANDSINTOWN_KEY = process.env.BANDSINTOWN_KEY;
 // EVENTBRITE_KEY is optional — if absent, Eventbrite is skipped.
 const EVENTBRITE_KEY = process.env.EVENTBRITE_KEY;
+// GROQ_API_KEY is optional — if absent, AI filtering is skipped.
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const TIMEOUT_MS = 8000;
 
 export const handler = async () => {
@@ -34,13 +36,16 @@ export const handler = async () => {
     ...(eb?.status === 'fulfilled' ? eb.value.map(normaliseEventbrite) : []),
   ];
 
+  // AI relevance filter — skipped if no key or if it fails (graceful fallback)
+  const filtered = GROQ_API_KEY ? await filterWithAI(events) : events;
+
   return {
     statusCode: 200,
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'public, s-maxage=900',
     },
-    body: JSON.stringify(events),
+    body: JSON.stringify(filtered),
   };
 };
 
@@ -128,6 +133,45 @@ function getISOWeekRange() {
     startDate: monStr,
     endDate: sunStr,
   };
+}
+
+async function filterWithAI(events) {
+  if (events.length === 0) return events;
+  try {
+    const list = events.map(e => ({ id: e.id, title: e.title, description: e.description, category: e.category }));
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        temperature: 0,
+        max_tokens: 512,
+        messages: [
+          {
+            role: 'system',
+            content: `You filter Stockholm events for a city guide targeting 18-35 year olds who want to discover interesting things to do.
+KEEP: concerts, live music, pop-ups, markets, flea markets (loppisar), art galleries, food events, club nights, sports, unique experiences, lagertömningar, cultural events.
+REMOVE: corporate conferences, seminars, webinars, kids/family-only events, tourist bus tours, generic chain promotions, religious services, political rallies.
+Reply with ONLY a JSON array of the IDs to keep. No explanation.`,
+          },
+          {
+            role: 'user',
+            content: JSON.stringify(list),
+          },
+        ],
+      }),
+    });
+    if (!res.ok) return events; // fallback: return all if Groq fails
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content?.trim() ?? '';
+    const keepIds = new Set(JSON.parse(content));
+    return events.filter(e => keepIds.has(e.id));
+  } catch {
+    return events; // fallback: return all on any error
+  }
 }
 
 export function normaliseTicketmaster(e) {
