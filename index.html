@@ -1,33 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello World Button</title>
-    <style>
-      body {
-        display: flex;
-        height: 100vh;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-      }
-      #hello-button {
-        font-size: 1.2rem;
-        padding: 12px 24px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
-    <button id="hello-button">Hello World</button>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stockholm Den Här Veckan</title>
+  <!-- Public Sanity config (read-only, safe to expose) -->
+  <meta name="sanity-project-id" content="YOUR_PROJECT_ID">
+  <meta name="sanity-public-token" content="YOUR_PUBLIC_READ_TOKEN">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
 
-    <script>
-      const button = document.getElementById('hello-button');
-      button.addEventListener('click', () => {
-        alert('Hello World');
-        console.log('Hello World button clicked');
-      });
-    </script>
-  </body>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">Stockholm <small>Den här veckan</small></div>
+  <div class="header-right">
+    <div class="saved-count" id="savedCount">
+      <svg viewBox="0 0 24 24" fill="#F0522A" stroke="#F0522A" stroke-width="1.5">
+        <path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/>
+      </svg>
+      <span>Inga sparade</span>
+    </div>
+    <button class="tipsa-btn" id="tipsaBtn">+ Tipsa oss</button>
+  </div>
+</header>
+
+<!-- ERROR BANNER -->
+<div class="error-banner" id="errorBanner" hidden>
+  Kunde inte ladda evenemang. Försök igen senare.
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow" id="heroEyebrow">Laddar vecka...</div>
+  <h1>Vad händer<br>i <em>Stockholm</em></h1>
+  <p class="hero-sub">Evenemang, pop-ups, fynd och upplevelser den här veckan.</p>
+</section>
+
+<!-- WEEKLY WEATHER BAR -->
+<div class="weather-bar" id="weatherBar">
+  <span class="weather-bar-label">Vädret denna vecka</span>
+  <!-- Injected by main.js -->
+</div>
+
+<!-- FILTERS -->
+<div class="filters" role="tablist">
+  <button class="filter-tab active" data-filter="allt" role="tab" aria-selected="true">Allt</button>
+  <button class="filter-tab" data-filter="musik" role="tab" aria-selected="false">Musik</button>
+  <button class="filter-tab" data-filter="konst" role="tab" aria-selected="false">Konst</button>
+  <button class="filter-tab" data-filter="mat" role="tab" aria-selected="false">Mat & dryck</button>
+  <button class="filter-tab" data-filter="pop-up" role="tab" aria-selected="false">Pop-up & marknad</button>
+  <button class="filter-tab" data-filter="fynd" role="tab" aria-selected="false">Fynd & rea</button>
+  <button class="filter-tab" data-filter="uteliv" role="tab" aria-selected="false">Uteliv</button>
+  <button class="filter-tab" data-filter="sport" role="tab" aria-selected="false">Sport</button>
+</div>
+
+<!-- EVENT LIST -->
+<main class="event-list" id="eventList" aria-live="polite">
+  <!-- Injected by main.js -->
+</main>
+
+<!-- EMPTY STATE -->
+<div class="empty-state" id="emptyState" hidden>
+  <h3>Inga evenemang här</h3>
+  <p>Prova en annan kategori — eller tipsa oss om något vi missat.</p>
+</div>
+
+<!-- TIP MODAL -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h2 id="modalTitle">Tipsa oss</h2>
+    <p class="modal-sub">Vet du om något vi missat? Vi granskar tipset och publicerar om det passar.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="tipName">Ditt namn</label>
+        <input id="tipName" type="text" placeholder="Anna Svensson">
+      </div>
+      <div class="form-group">
+        <label for="tipCategory">Kategori</label>
+        <select id="tipCategory">
+          <option value="pop-up">Pop-up & marknad</option>
+          <option value="musik">Musik</option>
+          <option value="konst">Konst</option>
+          <option value="mat">Mat & dryck</option>
+          <option value="fynd">Fynd & rea</option>
+          <option value="sport">Sport</option>
+          <option value="uteliv">Uteliv</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="tipTitle">Evenemang <span style="color:var(--coral)">*</span></label>
+      <input id="tipTitle" type="text" placeholder="Vad heter det?" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="tipDate">Datum <span style="color:var(--coral)">*</span></label>
+        <input id="tipDate" type="date" required>
+      </div>
+      <div class="form-group">
+        <label for="tipTime">Tid (valfritt)</label>
+        <input id="tipTime" type="time">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="tipAddress">Plats/adress <span style="color:var(--coral)">*</span></label>
+      <input id="tipAddress" type="text" placeholder="Adress eller område" required>
+    </div>
+    <div class="form-group">
+      <label for="tipDesc">Beskriv det kort</label>
+      <textarea id="tipDesc" placeholder="Vad är det? Varför ska folk gå dit?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modalClose">Avbryt</button>
+      <button class="btn-submit" id="tipSubmit">Skicka tips</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/js/main.js"></script>
+</body>
 </html>
