@@ -13,8 +13,7 @@ export const handler = async () => {
 
   // Named sources so results are never positionally mismatched
   const namedSources = [
-    { key: 'ticketmaster', promise: fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster') },
-    { key: 'visitstockholm', promise: fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm') },
+    ...(TICKETMASTER_KEY ? [{ key: 'ticketmaster', promise: fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster') }] : []),
     ...(BANDSINTOWN_KEY ? [{ key: 'bandsintown', promise: fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown') }] : []),
     ...(EVENTBRITE_KEY ? [{ key: 'eventbrite', promise: fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite', { Authorization: `Bearer ${EVENTBRITE_KEY}` }) }] : []),
   ];
@@ -31,7 +30,7 @@ export const handler = async () => {
     }
   }
 
-  const allFailed = Object.values(byKey).every(r => r?.status === 'rejected');
+  const allFailed = namedSources.length > 0 && Object.values(byKey).every(r => r?.status === 'rejected');
   if (allFailed) {
     return {
       statusCode: 502,
@@ -42,7 +41,6 @@ export const handler = async () => {
 
   const events = [
     ...(byKey.ticketmaster?.status === 'fulfilled' ? byKey.ticketmaster.value.map(normaliseTicketmaster) : []),
-    ...(byKey.visitstockholm?.status === 'fulfilled' ? byKey.visitstockholm.value.map(normaliseVisitStockholm) : []),
     ...(byKey.bandsintown?.status === 'fulfilled' ? byKey.bandsintown.value.map(normaliseBandsintown) : []),
     ...(byKey.eventbrite?.status === 'fulfilled' ? byKey.eventbrite.value.map(normaliseEventbrite) : []),
   ];
@@ -74,7 +72,6 @@ async function fetchWithTimeout(url, ms, source, headers = {}) {
 
 function extractEvents(source, data) {
   if (source === 'ticketmaster') return data._embedded?.events ?? [];
-  if (source === 'visitstockholm') return data.result ?? data.events ?? [];
   if (source === 'bandsintown') return Array.isArray(data) ? data : [];
   if (source === 'eventbrite') return data.events ?? [];
   return [];
@@ -88,14 +85,13 @@ function ticketmasterUrl(week) {
     + `&size=50`;
 }
 
-function visitStockholmUrl(week) {
-  return `https://www.visitstockholm.com/open-api/events/?start=${week.startDate}&end=${week.endDate}`;
-}
 
 function eventbriteUrl(week) {
+  // Stockholm coordinates — more reliable than address string for Eventbrite
   return `https://www.eventbriteapi.com/v3/events/search/`
-    + `?location.address=Stockholm,Sweden`
-    + `&location.within=20km`
+    + `?location.latitude=59.3293`
+    + `&location.longitude=18.0686`
+    + `&location.within=15km`
     + `&start_date.range_start=${week.start}Z`
     + `&start_date.range_end=${week.end}Z`
     + `&expand=venue,category`
