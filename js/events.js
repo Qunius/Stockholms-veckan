@@ -88,10 +88,37 @@ async function fetchFallbackEvents() {
     const res = await fetch('data/events.json');
     if (!res.ok) return null;
     const events = await res.json();
-    return sortEvents(events);
+    return sortEvents(remapToCurrentWeek(events));
   } catch {
     return null;
   }
+}
+
+// Remap demo event dates to the current ISO week so weather forecasts apply
+function remapToCurrentWeek(events) {
+  const now = new Date();
+  const dow = now.getDay() || 7; // Mon=1 … Sun=7
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dow + 1);
+
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const dayNames   = ['Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag','Söndag'];
+  const monthNames = ['jan','feb','mars','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+
+  return events.map(e => {
+    const orig    = new Date(e.date + 'T12:00:00');
+    const origDow = orig.getDay() === 0 ? 6 : orig.getDay() - 1; // Mon=0 … Sun=6
+    const newDate = new Date(monday);
+    newDate.setDate(monday.getDate() + origDow);
+    const newDateStr  = fmt(newDate);
+    const dayName     = dayNames[origDow];
+    const monthName   = monthNames[newDate.getMonth()];
+    const timeLabel   = e.time
+      ? `${dayName} ${newDate.getDate()} ${monthName} · ${e.time}`
+      : `${dayName} ${newDate.getDate()} ${monthName}`;
+    return { ...e, date: newDateStr, timeLabel };
+  });
 }
 
 async function fetchApiEvents() {
