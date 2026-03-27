@@ -37,7 +37,8 @@ export async function fetchWeeklyForecast() {
     + '&hourly=temperature_2m,weather_code'
     + '&daily=weather_code,temperature_2m_max'
     + '&timezone=Europe%2FStockholm'
-    + '&forecast_days=7';
+    + '&forecast_days=7'
+    + '&past_days=6';
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Open-Meteo ${res.status}`);
