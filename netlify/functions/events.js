@@ -5,12 +5,26 @@ const BANDSINTOWN_KEY = process.env.BANDSINTOWN_KEY;
 const TIMEOUT_MS = 8000;
 
 export const handler = async () => {
+  const week = getISOWeekRange();
   const sources = [
-    fetchWithTimeout(ticketmasterUrl(), TIMEOUT_MS),
-    fetchWithTimeout(visitStockholmUrl(), TIMEOUT_MS),
-    ...(BANDSINTOWN_KEY ? [fetchWithTimeout(bandsintownUrl(), TIMEOUT_MS)] : []),
+    fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster'),
+    fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm'),
+    ...(BANDSINTOWN_KEY ? [fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown')] : []),
   ];
-  const [tm, vs, bt] = await Promise.allSettled(sources);
+  const results = await Promise.allSettled(sources);
+  const [tm, vs, bt] = results;
+
+  // Check if all sources failed
+  const allFailed = [tm, vs, ...(bt ? [bt] : [])].every(r => r?.status === 'rejected');
+  if (allFailed) {
+    return {
+      statusCode: 502,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'all upstream sources failed' }),
+    };
+  }
 
   const events = [
     ...(tm?.status === 'fulfilled' ? tm.value.map(normaliseTicketmaster) : []),
@@ -28,27 +42,26 @@ export const handler = async () => {
   };
 };
 
-async function fetchWithTimeout(url, ms) {
+async function fetchWithTimeout(url, ms, source) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
     const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) throw new Error(`${res.status}`);
-    return res.json().then(d => extractEvents(url, d));
+    return res.json().then(d => extractEvents(source, d));
   } finally {
     clearTimeout(timer);
   }
 }
 
-function extractEvents(url, data) {
-  if (url.includes('ticketmaster')) return data._embedded?.events ?? [];
-  if (url.includes('visitstockholm')) return data.result ?? data.events ?? [];
-  if (url.includes('bandsintown')) return Array.isArray(data) ? data : [];
+function extractEvents(source, data) {
+  if (source === 'ticketmaster') return data._embedded?.events ?? [];
+  if (source === 'visitstockholm') return data.result ?? data.events ?? [];
+  if (source === 'bandsintown') return Array.isArray(data) ? data : [];
   return [];
 }
 
-function ticketmasterUrl() {
-  const week = getISOWeekRange();
+function ticketmasterUrl(week) {
   return `https://app.ticketmaster.com/discovery/v2/events.json`
     + `?apikey=${TICKETMASTER_KEY}`
     + `&city=Stockholm&countryCode=SE`
@@ -56,13 +69,11 @@ function ticketmasterUrl() {
     + `&size=50`;
 }
 
-function visitStockholmUrl() {
-  const week = getISOWeekRange();
+function visitStockholmUrl(week) {
   return `https://www.visitstockholm.com/open-api/events/?start=${week.startDate}&end=${week.endDate}`;
 }
 
-function bandsintownUrl() {
-  const week = getISOWeekRange();
+function bandsintownUrl(week) {
   return `https://rest.bandsintown.com/v1.0/city/Stockholm/events`
     + `?app_id=${BANDSINTOWN_KEY}`
     + `&date=${week.startDate}%2C${week.endDate}`;
@@ -119,7 +130,7 @@ export function normaliseTicketmaster(e) {
     title: e.name,
     description: '',
     category,
-    categoryLabel: { musik:'Musik', sport:'Sport', konst:'Konst', uteliv:'Uteliv' }[category],
+    categoryLabel: { musik:'Musik', sport:'Sport', konst:'Konst', uteliv:'Uteliv' }[category] ?? 'Uteliv',
     date: e.dates?.start?.localDate ?? '',
     time: e.dates?.start?.localTime?.slice(0,5) ?? null,
     timeLabel: '',
