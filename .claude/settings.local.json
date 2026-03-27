@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(bash scripts/start-server.sh --project-dir /Users/pavel/VS-code)",
-      "WebSearch",
-      "Bash(node:*)"
-    ]
-  }
-}
