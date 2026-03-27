@@ -107,6 +107,14 @@ body {
   padding: 48px 32px 36px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.hero-text {
+  flex: 1;
 }
 
 .hero-eyebrow {
@@ -137,6 +145,19 @@ body {
   color: #555;
   line-height: 1.6;
   max-width: 500px;
+}
+
+.hero-week-number {
+  font-family: var(--font-serif);
+  font-size: clamp(80px, 12vw, 160px);
+  font-weight: 400;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--border);
+  letter-spacing: -4px;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
 }
 
 /* Weekly weather bar */

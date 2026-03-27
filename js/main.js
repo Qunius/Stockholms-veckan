@@ -76,6 +76,8 @@ function setWeekLabel() {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
   heroEyebrow.textContent = `Vecka ${weekNum} i Stockholm`;
+  const weekNumEl = document.getElementById('heroWeekNumber');
+  if (weekNumEl) weekNumEl.textContent = `V.${weekNum}`;
 }
 
 function renderWeatherBar(forecast) {
