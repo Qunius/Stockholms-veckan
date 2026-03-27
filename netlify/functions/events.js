@@ -2,6 +2,8 @@ const TICKETMASTER_KEY = process.env.TICKETMASTER_KEY;
 // BANDSINTOWN_KEY is optional — if absent, Bandsintown is skipped and
 // small-venue music is added manually via Sanity CMS instead.
 const BANDSINTOWN_KEY = process.env.BANDSINTOWN_KEY;
+// EVENTBRITE_KEY is optional — if absent, Eventbrite is skipped.
+const EVENTBRITE_KEY = process.env.EVENTBRITE_KEY;
 const TIMEOUT_MS = 8000;
 
 export const handler = async () => {
@@ -10,18 +12,17 @@ export const handler = async () => {
     fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster'),
     fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm'),
     ...(BANDSINTOWN_KEY ? [fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown')] : []),
+    ...(EVENTBRITE_KEY ? [fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite')] : []),
   ];
   const results = await Promise.allSettled(sources);
-  const [tm, vs, bt] = results;
+  const [tm, vs, bt, eb] = results;
 
   // Check if all sources failed
-  const allFailed = [tm, vs, ...(bt ? [bt] : [])].every(r => r?.status === 'rejected');
+  const allFailed = [tm, vs, ...(bt ? [bt] : []), ...(eb ? [eb] : [])].every(r => r?.status === 'rejected');
   if (allFailed) {
     return {
       statusCode: 502,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ error: 'all upstream sources failed' }),
     };
   }
@@ -30,6 +31,7 @@ export const handler = async () => {
     ...(tm?.status === 'fulfilled' ? tm.value.map(normaliseTicketmaster) : []),
     ...(vs?.status === 'fulfilled' ? vs.value.map(normaliseVisitStockholm) : []),
     ...(bt?.status === 'fulfilled' ? bt.value.map(normaliseBandsintown) : []),
+    ...(eb?.status === 'fulfilled' ? eb.value.map(normaliseEventbrite) : []),
   ];
 
   return {
@@ -58,6 +60,7 @@ function extractEvents(source, data) {
   if (source === 'ticketmaster') return data._embedded?.events ?? [];
   if (source === 'visitstockholm') return data.result ?? data.events ?? [];
   if (source === 'bandsintown') return Array.isArray(data) ? data : [];
+  if (source === 'eventbrite') return data.events ?? [];
   return [];
 }
 
@@ -71,6 +74,17 @@ function ticketmasterUrl(week) {
 
 function visitStockholmUrl(week) {
   return `https://www.visitstockholm.com/open-api/events/?start=${week.startDate}&end=${week.endDate}`;
+}
+
+function eventbriteUrl(week) {
+  return `https://www.eventbriteapi.com/v3/events/search/`
+    + `?token=${EVENTBRITE_KEY}`
+    + `&location.address=Stockholm,Sweden`
+    + `&location.within=10km`
+    + `&start_date.range_start=${week.start}`
+    + `&start_date.range_end=${week.end}`
+    + `&expand=venue,category`
+    + `&page_size=50`;
 }
 
 function bandsintownUrl(week) {
@@ -159,6 +173,33 @@ export function normaliseVisitStockholm(e) {
     featured: false,
     badges: [],
     source: 'visitstockholm',
+  };
+}
+
+export function normaliseEventbrite(e) {
+  const catMap = {
+    'music': 'musik', 'sports & fitness': 'sport', 'arts': 'konst',
+    'food & drink': 'mat', 'nightlife': 'uteliv',
+  };
+  const catName = e.category?.name?.toLowerCase() ?? '';
+  const category = Object.entries(catMap).find(([k]) => catName.includes(k))?.[1] ?? 'uteliv';
+  const start = e.start?.local ?? '';
+  const [datePart, timePart] = start.split('T');
+  const address = [e.venue?.address?.localized_address_display].filter(Boolean).join('') || 'Stockholm';
+  return {
+    id: `eb-${e.id}`,
+    title: e.name?.text ?? 'Okänt evenemang',
+    description: e.description?.text ?? '',
+    category,
+    categoryLabel: { musik:'Musik', sport:'Sport', konst:'Konst', mat:'Mat & dryck', uteliv:'Uteliv' }[category] ?? 'Uteliv',
+    date: datePart ?? '',
+    time: timePart ? timePart.slice(0, 5) : null,
+    timeLabel: '',
+    address,
+    imageUrl: e.logo?.url ?? null,
+    featured: false,
+    badges: [],
+    source: 'eventbrite',
   };
 }
 
