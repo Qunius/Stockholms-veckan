@@ -10,17 +10,19 @@ const TIMEOUT_MS = 8000;
 
 export const handler = async () => {
   const week = getISOWeekRange();
-  const sources = [
-    fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster'),
-    fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm'),
-    ...(BANDSINTOWN_KEY ? [fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown')] : []),
-    ...(EVENTBRITE_KEY ? [fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite', { Authorization: `Bearer ${EVENTBRITE_KEY}` })] : []),
-  ];
-  const results = await Promise.allSettled(sources);
-  const [tm, vs, bt, eb] = results;
 
-  // Check if all sources failed
-  const allFailed = [tm, vs, ...(bt ? [bt] : []), ...(eb ? [eb] : [])].every(r => r?.status === 'rejected');
+  // Named sources so results are never positionally mismatched
+  const namedSources = [
+    { key: 'ticketmaster', promise: fetchWithTimeout(ticketmasterUrl(week), TIMEOUT_MS, 'ticketmaster') },
+    { key: 'visitstockholm', promise: fetchWithTimeout(visitStockholmUrl(week), TIMEOUT_MS, 'visitstockholm') },
+    ...(BANDSINTOWN_KEY ? [{ key: 'bandsintown', promise: fetchWithTimeout(bandsintownUrl(week), TIMEOUT_MS, 'bandsintown') }] : []),
+    ...(EVENTBRITE_KEY ? [{ key: 'eventbrite', promise: fetchWithTimeout(eventbriteUrl(week), TIMEOUT_MS, 'eventbrite', { Authorization: `Bearer ${EVENTBRITE_KEY}` }) }] : []),
+  ];
+
+  const results = await Promise.allSettled(namedSources.map(s => s.promise));
+  const byKey = Object.fromEntries(namedSources.map((s, i) => [s.key, results[i]]));
+
+  const allFailed = Object.values(byKey).every(r => r?.status === 'rejected');
   if (allFailed) {
     return {
       statusCode: 502,
@@ -30,10 +32,10 @@ export const handler = async () => {
   }
 
   const events = [
-    ...(tm?.status === 'fulfilled' ? tm.value.map(normaliseTicketmaster) : []),
-    ...(vs?.status === 'fulfilled' ? vs.value.map(normaliseVisitStockholm) : []),
-    ...(bt?.status === 'fulfilled' ? bt.value.map(normaliseBandsintown) : []),
-    ...(eb?.status === 'fulfilled' ? eb.value.map(normaliseEventbrite) : []),
+    ...(byKey.ticketmaster?.status === 'fulfilled' ? byKey.ticketmaster.value.map(normaliseTicketmaster) : []),
+    ...(byKey.visitstockholm?.status === 'fulfilled' ? byKey.visitstockholm.value.map(normaliseVisitStockholm) : []),
+    ...(byKey.bandsintown?.status === 'fulfilled' ? byKey.bandsintown.value.map(normaliseBandsintown) : []),
+    ...(byKey.eventbrite?.status === 'fulfilled' ? byKey.eventbrite.value.map(normaliseEventbrite) : []),
   ];
 
   // AI relevance filter — skipped if no key or if it fails (graceful fallback)
