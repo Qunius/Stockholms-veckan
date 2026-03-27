@@ -22,6 +22,15 @@ export const handler = async () => {
   const results = await Promise.allSettled(namedSources.map(s => s.promise));
   const byKey = Object.fromEntries(namedSources.map((s, i) => [s.key, results[i]]));
 
+  // Log each source result for debugging
+  for (const [key, result] of Object.entries(byKey)) {
+    if (result?.status === 'rejected') {
+      console.error(`[events] ${key} failed:`, result.reason?.message ?? result.reason);
+    } else {
+      console.log(`[events] ${key} ok — ${result?.value?.length ?? 0} events`);
+    }
+  }
+
   const allFailed = Object.values(byKey).every(r => r?.status === 'rejected');
   if (allFailed) {
     return {
