@@ -27,7 +27,7 @@ export function isWithin7Days(dateStr) {
   const eventDate = new Date(dateStr + 'T12:00:00');
   const todayDate = new Date(todayStockholm + 'T12:00:00');
   const diffMs = eventDate - todayDate;
-  return diffMs >= 0 && diffMs <= 7 * 24 * 60 * 60 * 1000;
+  return diffMs >= -6 * 24 * 60 * 60 * 1000 && diffMs <= 7 * 24 * 60 * 60 * 1000;
 }
 
 // Fetch weekly forecast for Stockholm (lat 59.33, lon 18.07)

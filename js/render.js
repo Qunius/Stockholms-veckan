@@ -22,12 +22,12 @@ export function renderEventCard(event, weather) {
     .join('');
 
   const weatherHtml = weather
-    ? `<div class="weather-block">
+    ? `<div class="actions-divider"></div>
+       <div class="weather-block">
          <img src="assets/icons/${esc(weather.icon)}.svg" alt="${esc(weather.label)}" width="30" height="30">
          <span class="weather-temp">${esc(weather.temp)}°C</span>
          <span class="weather-label">${esc(weather.label)}</span>
-       </div>
-       <div class="actions-divider"></div>`
+       </div>`
     : '';
 
   return `
@@ -46,13 +46,13 @@ export function renderEventCard(event, weather) {
         </div>
       </div>
       <div class="event-actions">
-        ${weatherHtml}
         <button class="heart-btn" aria-label="Spara evenemang">
           <svg viewBox="0 0 24 24" fill="none" stroke="#C8C2B8" stroke-width="1.5">
             <path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"/>
           </svg>
           <span class="heart-label">Spara</span>
         </button>
+        ${weatherHtml}
       </div>
     </div>`;
 }
