@@ -136,7 +136,7 @@ async function fetchSanityEvents() {
   );
   const url = `https://${SANITY_PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${SANITY_DATASET}?query=${query}`;
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${SANITY_PUBLIC_TOKEN}` },
+    headers: SANITY_PUBLIC_TOKEN ? { Authorization: `Bearer ${SANITY_PUBLIC_TOKEN}` } : {},
   });
   if (!res.ok) throw new Error(`Sanity ${res.status}`);
   const data = await res.json();
